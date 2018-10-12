@@ -1,0 +1,35 @@
+.col {
+  width: 50%;
+  min-height: 100%;
+  justify-content: center;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.row {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.menu-btn {
+  width: 60%;
+  height: 75px;
+  margin-bottom: 20px;
+}
+
+mat-form-field {
+  width: 60%;
+}

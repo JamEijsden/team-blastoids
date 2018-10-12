@@ -1,0 +1,17 @@
+/* You can add global styles to this file, and also import other style files */
+@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
+.card-width {
+  width: 320px;
+}
+
+.flex-box {
+  display: flex;
+  flex-direction: column;
+}
+.vertical-spacer {
+  flex: 1;
+}
+
+.padding-top {
+  padding-top: 76px;
+}

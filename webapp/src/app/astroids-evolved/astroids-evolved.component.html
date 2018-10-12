@@ -1,0 +1,6 @@
+<div style="height: 100vh; width: 100vw;" class="center">
+  <div *ngIf="viewLoading" class="spinner-wrapper">
+    <mat-spinner  class="spinner"></mat-spinner>
+  </div>
+  <div [hidden]="viewLoading" (pointerdown)="onStageClick($event)" #container class="container center" ></div>
+</div>
