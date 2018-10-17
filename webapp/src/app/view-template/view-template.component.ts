@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 
 @Component({
   selector: 'app-view-template',
@@ -6,6 +6,8 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./view-template.component.scss']
 })
 export class ViewTemplateComponent implements OnInit {
+
+  @Input() viewReady = false;
 
   constructor() { }
 

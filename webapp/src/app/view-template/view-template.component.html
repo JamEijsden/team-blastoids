@@ -1,6 +1,9 @@
 <app-space-background class="fixed-background"></app-space-background>
 <div class="container">
   <mat-card class="card">
-    <ng-content></ng-content>
+    <ng-content *ngIf="viewReady; else loading"></ng-content>
+    <ng-template #loading>
+      <mat-spinner></mat-spinner>
+    </ng-template>
   </mat-card>
 </div>

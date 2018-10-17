@@ -3,8 +3,15 @@ import { CommonModule } from '@angular/common';
 import {HomeComponent} from "./home.component";
 import {RouterModule, Routes} from "@angular/router";
 import {FormsModule} from "@angular/forms";
-import {MatButton, MatButtonModule, MatFormFieldModule, MatInputModule} from "@angular/material";
+import {
+  MatButtonModule,
+  MatFormFieldModule,
+  MatInputModule
+} from "@angular/material";
 import {ViewTemplateModule} from "../view-template/view-template.module";
+import {WebsocketService} from "../_service/websocket-service";
+import {MenuModule} from "../menu/menu.module";
+
 
 const routes: Routes = [{
   path: '', component: HomeComponent
@@ -18,8 +25,10 @@ const routes: Routes = [{
     ViewTemplateModule,
     MatFormFieldModule,
     MatInputModule,
-    RouterModule.forRoot(routes),
+    MenuModule,
+    RouterModule.forRoot(routes)
   ],
+  providers: [],
   declarations: [HomeComponent]
 })
 export class HomeModule { }

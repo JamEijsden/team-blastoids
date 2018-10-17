@@ -1,4 +1,5 @@
-<app-view-template>
+<app-menu>
+<app-view-template [viewReady]="viewReady">
   <div class="flex-col">
     <div class="flex col">
       <div class="flex-row">
@@ -17,11 +18,23 @@
           <h2>Ship</h2>
         </div>
         <div class="flex row">
-          <mat-form-field>
-            <input matInput placeholder="Name" value="Farty_McFartpants" [value]="playerName"/>
+          <mat-form-field class="center">
+            <input matInput placeholder="Name" (keyup)="updatePlayerName($event)" (change)="publishNameChange($event)" [(ngModel)]="playerName"/>
           </mat-form-field>
+        </div>
+        <div class="flex row" style="justify-content: center;">
+          <input #colorPicker type="color" style="display: none;" (change)="setBackgroundColorByEvent($event, colorDiv)" [(ngModel)]="playerColor"/>
+          <div #colorDiv style="margin-top: 20px; text-align: center; height: 40px; background: #FF0000; width: 60%;" (click)="colorPicker.click()">
+            <span class="" style="line-height: 40px;">Pick ship color</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
+  <div class="flex-col" style="width: 200px;">
+    <div class="flex col">
+
+    </div>
+  </div>
 </app-view-template>
+</app-menu>

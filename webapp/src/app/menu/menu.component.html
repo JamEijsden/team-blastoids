@@ -1,0 +1,12 @@
+<button mat-fab (click)="chat.toggle()" class="btn menu-btn"><mat-icon>{{chat.opened ? 'close' : 'menu'}}</mat-icon></button>
+<button mat-fab *ngIf="chat.opened" routerLink="/" class="btn home-btn"><mat-icon>home</mat-icon></button>
+<mat-drawer-container [hasBackdrop]="false" class="drawer">
+  <mat-drawer #chat class="drawer-content" [autoFocus]="false" position="end" mode="over">
+    <app-chat [name]="name" [colorProperties]="colorProperties"></app-chat>
+  </mat-drawer>
+  <mat-drawer-content>
+    <ng-content class="main-content"></ng-content>
+  </mat-drawer-content>
+</mat-drawer-container>
+
+

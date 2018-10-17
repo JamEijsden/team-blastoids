@@ -23,6 +23,7 @@ export class Player{
   private maxVelocity = 12.5;
   private minVelocity = 0;
   private acceleration = 0.5;
+  nameTag: PIXI.Text;
 
 
   constructor(playerId: string,  movementVelocity, acceleration, interactive: boolean) {
@@ -37,11 +38,11 @@ export class Player{
       this.graphic.clear();
       const change = 0.5*(Math.sin(tick) + 0.5);
       if(this.isAlive){
-        this.graphic.lineStyle(3 + change*3, 0x5BFF2D, this.graphic.opacity - change);
+        this.graphic.lineStyle(3 + change*3, this.color, this.graphic.opacity - change);
       } else {
-        this.graphic.lineStyle(3, 0x5BFF2D, this.graphic.opacity);
+        this.graphic.lineStyle(3, this.color, this.graphic.opacity);
       }
-      this.graphic.beginFill(0xFF700B, 0);
+      this.graphic.beginFill(this.color, 0);
       this.graphic.drawRect(-15, -15, 30, 30);
   }
 
@@ -52,7 +53,7 @@ export class Player{
     //player.texture.baseTexture.on('loaded', ()=>{this.floor = this.app.screen.height - player.height/2});
     this.graphic.opacity = 1;
     this.graphic.lineStyle(1, this.color, this.graphic.opacity);
-    this.graphic.beginFill(0xFF700B, 0);
+    this.graphic.beginFill(this.color, 0);
     this.graphic.drawRect(-15, -15, 30, 30);
 
 
@@ -74,6 +75,7 @@ export class Player{
     // Pointers normalize touch and mouse
 
     this.createBomb();
+    this.createNameTag()
 
     if(this.interactive){
       this.initKeyboardListeners();
@@ -81,9 +83,43 @@ export class Player{
     return this.graphic;
   }
 
+  updatePLayerPositionX(){
+    this.x += this.vx;
+    if(!this.isBombActive) this.bomb.x += this.vx;
+    this.updateNameTagPosition();
+  }
+
+  updatePlayerPositionY(){
+    this.y += this.vy;
+    if(!this.isBombActive) this.bomb.y += this.vy;
+    this.updateNameTagPosition();
+  }
+
+  updateNameTagPosition(){
+    this.nameTag.x = this.x;
+    this.nameTag.y = this.y - 50;
+  }
+
+  createNameTag(){
+    const text = new PIXI.Text(this.id, {
+      //fontWeight: 'bold',
+      //fontStyle: 'italic',
+      fontSize: 14,
+      fontFamily: 'Impact',
+      fill: "#FFFFFF",
+      fillOpacity: 0,
+      align: 'center',
+      stroke: '#00d0ff',
+      strokeThickness: 0
+    });
+    text.anchor.x = 0.5;
+    text.x = this.x;
+    text.y = this.y - 50;
+    this.nameTag = text;
+  }
+
   createBomb(){
     this.bomb = Bomb.create(this.graphic.width / 2, this.graphic.x, this.graphic.y, this.color, this.graphic.opacity);
-    console.log(this.bomb);
   }
 
   initKeyboardListeners(){
@@ -103,7 +139,6 @@ export class Player{
 
     this.up.press = () => {
       this.graphic.vy = -this.movementVelocity;
-      console.log(this.graphic.x, this.graphic.vx, this.graphic.y, this.graphic.vy, this.graphic.height );
       this.graphic.ay = -this.acceleration;
     };
     this.up.release = () => {

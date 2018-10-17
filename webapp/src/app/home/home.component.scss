@@ -11,6 +11,7 @@
 .flex-col {
   display: flex;
   flex-direction: row;
+  margin: 20px;
 }
 
 .flex-row {
@@ -32,4 +33,13 @@
 
 mat-form-field {
   width: 60%;
+}
+
+.center {
+  margin: 0 auto;
+}
+
+h2 {
+  margin: 0 auto;
+  margin-bottom: 20px;
 }

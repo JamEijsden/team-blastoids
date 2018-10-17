@@ -4,6 +4,8 @@ import {Keyboard} from './player/keyboard';
 import {Player} from './player/player';
 import {Bullet} from './player/bullet';
 import {Bomb} from './player/bomb';
+import {StoreService} from "../_service/store-service";
+import {WebsocketService} from "../_service/websocket-service";
 
 declare var PIXI;
 
@@ -17,7 +19,8 @@ export class AstroidsEvolvedComponent implements OnInit {
 
 
   private STATE = this.play;
-  playerId: string = 'Jimmie';
+  playerId: string = '';
+  playerColor: string = '';
   players: Map<String, Player> = new Map();
   app: PIXI.Application;
   @ViewChild('container') container: ElementRef;
@@ -37,19 +40,40 @@ export class AstroidsEvolvedComponent implements OnInit {
   private isHost: boolean = true;
   private maxFramerate: number = 60;
 
-  constructor() {
+  constructor(private _websocket: WebsocketService, private _store: StoreService) {
+    this.playerId = _store.getPlayerName();
+    this.playerColor = _store.getPlayerColor();
+  }
+
+  connectToServer(){
+    const c = this._websocket.connect('game')
+    c.on('connect', ()=>{
+        c.emit('join', {name: this.playerId, color: this.playerColor});
+    });
+
+    c.on('init_update', (event)=>{
+      console.log(event);
+      c.on('update', (data)=>{
+        console.log(data);
+      });
+    });
+
+    c.on('join', ()=>{
+
+    });
+
   }
 
   ngOnInit() {
     this.initApp();
     this.app.stage.interactive = true;
-    this.initPlayers();
+    //this.initPlayer();
     this.initAnimations();
     this.scoreText = this.createScoreText();
     this.app.ticker.add(delta => this.gameLoop(delta));
     this.viewLoading = false;
     if(this.isHost) {
-      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
+      //setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
     }
   }
 
@@ -66,15 +90,21 @@ export class AstroidsEvolvedComponent implements OnInit {
     });
   }
 
-  initPlayers(){
+  initPlayer(x, y){
     const player = new Player(this.playerId, this.movementVelocity, this.acceleration, true);
+    player.color = +this._store.getPlayerColor();
     const spawn = {
-      x: this.app.screen.width/2,
-      y: this.app.screen.height/2
+      x: x,
+      y: y
     };
     this.addToScene(player.createPlayerGraphic(spawn));
     this.addToScene(player.bomb);
+    this.addToScene(player.nameTag);
     this.players.set(player.id, player);
+  }
+
+  initPlayers(){
+
   }
 
   addToScene(object){
@@ -167,12 +197,10 @@ export class AstroidsEvolvedComponent implements OnInit {
     this.players.forEach(
       player => {
         if(this.isInBoundsX(player)){
-          player.x += player.vx;
-          if(!player.isBombActive) player.bomb.x += player.vx;
+         player.updatePLayerPositionX();
         }
         if(this.isInBoundsY(player)){
-          player.y += player.vy;
-          if(!player.isBombActive) player.bomb.y += player.vy;
+         player.updatePlayerPositionY();
         }
       });
 
@@ -193,6 +221,7 @@ export class AstroidsEvolvedComponent implements OnInit {
     }
     this.setPlayerAlive(player,false, 0.2);
     this.removeAllBullets(player);
+    this.destroyBomb(player, true);
     setTimeout(()=>{this.setPlayerAlive(player,true, 1)}, 3000);
   }
 
@@ -336,7 +365,6 @@ export class AstroidsEvolvedComponent implements OnInit {
     const asteroid = this.createAsteroid(this.app.screen.width/2, this.app.screen.height/2);
     this.app.stage.addChild(asteroid);
     this.asteroids.push(asteroid);
-    console.log(this.spawnTime, this.difficultyModifier);
     //setTimeout(()=>this.removeObjectFromStage(asteroid, this.asteroids), 15500);
     setTimeout(()=>this.spawnAsteroid(), this.spawnTime);
   }
@@ -406,16 +434,23 @@ export class AstroidsEvolvedComponent implements OnInit {
 
   }
 
+  destroyBomb(player, available) {
+    player.bomb.clear();
+    this.app.stage.removeChild(player.bomb);
+    player.isBombActive = false;
+    //player.isBombAvailable = available;
+    setTimeout(()=>{
+      player.createBomb();
+      this.app.stage.addChild(player.bomb);
+      player.isBombAvailable = true;
+    }, player.spawnTime + 2000);
+
+  }
+
   redrawActivatedBomb(player){
     if(player.bomb.radius > 200) {
-      player.bomb.clear();
-      this.app.stage.removeChild(player.bomb);
-      player.isBombActive = false;
-      setTimeout(()=>{
-        player.createBomb();
-        this.app.stage.addChild(player.bomb);
-        player.isBombAvailable = true;
-      }, 5000);
+      this.destroyBomb(player, false);
+
       return;
     }
     player.bomb.radius += 3;
