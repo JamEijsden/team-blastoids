@@ -46,13 +46,16 @@ export class AstroidsEvolvedComponent implements OnInit {
   }
 
   connectToServer(){
-    const c = this._websocket.connect('game')
+    const c = this._websocket.connect('game');
     c.on('connect', ()=>{
         c.emit('join', {name: this.playerId, color: this.playerColor});
     });
 
-    c.on('init_update', (event)=>{
-      console.log(event);
+    c.on('join_data', (players) => {
+      console.log(players);
+      this.initPlayers(players);
+      this.initPlayer(players[0].pos.x, players[0].pos.y);
+      this.init();
       c.on('update', (data)=>{
         console.log(data);
       });
@@ -64,10 +67,23 @@ export class AstroidsEvolvedComponent implements OnInit {
 
   }
 
+
   ngOnInit() {
     this.initApp();
     this.app.stage.interactive = true;
+    console.log();
+
+    this.connectToServer();
+  }
+
+  initStageOnClickListener(){
+    this.container.nativeElement.addEventListener("pointerdown", (event) => {this.onStageClick(event)});
+  }
+
+  init() {
+
     //this.initPlayer();
+    this.initStageOnClickListener();
     this.initAnimations();
     this.scoreText = this.createScoreText();
     this.app.ticker.add(delta => this.gameLoop(delta));
@@ -92,7 +108,7 @@ export class AstroidsEvolvedComponent implements OnInit {
 
   initPlayer(x, y){
     const player = new Player(this.playerId, this.movementVelocity, this.acceleration, true);
-    player.color = +this._store.getPlayerColor();
+    player.color = +this.playerColor.color;
     const spawn = {
       x: x,
       y: y
@@ -103,8 +119,20 @@ export class AstroidsEvolvedComponent implements OnInit {
     this.players.set(player.id, player);
   }
 
-  initPlayers(){
-
+  initPlayers(players){
+    players.forEach(
+      p => {
+        const player = new Player(p.id, this.movementVelocity, this.acceleration, false);
+        player.color = + p.color;
+        const spawn = {
+          x: p.pos.x,
+          y: p.pos.y
+        };
+        this.addToScene(player.createPlayerGraphic(spawn));
+        this.addToScene(player.bomb);
+        this.addToScene(player.nameTag);
+        this.players.set(player.id, player);
+      });
   }
 
   addToScene(object){

@@ -44,8 +44,15 @@ app.use('/ws', wsRoutes);
 
 
 const io = socketIO(server);
-const host = null;
-const players = [];
+const host = {
+		id: 'Stiffi',
+		color: '0x00F0F0',
+		pos: {
+			x: 400,
+			y: 400
+		}
+};
+const players = [host];
 
 const chat = io
 .of('/chat')
@@ -71,9 +78,9 @@ const game = io
 .of("/game")
 .on('connection', (socket) => {
 	//socket.emit('connect', JSON.stringify({ hello: 'world', nsp: nsp.name}));
-	socket.on('join', (player)=>{
-		socket.broadcast.emit('join', player);
-		socket.emit('init_update', players);
+	socket.on('join', (player) => {
+		socket.emit('join_data', players);
+		//socket.broadcast.emit('join', player);
 	});
 
 	socket.on('host', (player)=>{

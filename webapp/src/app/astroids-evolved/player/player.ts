@@ -13,11 +13,11 @@ export class Player{
   bomb;
   isAlive = true;
   color = 0x5BFF2D;
-  private left = this.keyObject.newKeyEvent(65);
-  private up = this.keyObject.newKeyEvent(87);
-  private right = this.keyObject.newKeyEvent(68);
-  private down = this.keyObject.newKeyEvent(83);
-  private space = this.keyObject.newKeyEvent(32);
+  private left;
+  private up;
+  private right;
+  private down;
+  private space;
   private interactive: boolean;
   private movementVelocity = 7;
   private maxVelocity = 12.5;
@@ -31,6 +31,17 @@ export class Player{
     this.interactive = interactive;
     this.movementVelocity = movementVelocity;
     this.acceleration = acceleration;
+    if(this.interactive) {
+      this.initKeyListeners();
+    }
+  }
+
+  initKeyListeners(){
+    this.left = this.keyObject.newKeyEvent(65);
+    this.up = this.keyObject.newKeyEvent(87);
+    this.right = this.keyObject.newKeyEvent(68);
+    this.down = this.keyObject.newKeyEvent(83);
+    this.space = this.keyObject.newKeyEvent(32);
   }
 
   animatePlayer(tick){

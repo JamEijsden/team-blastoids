@@ -5,7 +5,10 @@
 
 div.spinner-wrapper {
   display: flex;
+  position: fixed;
   margin: 0 auto;
+  left: 50%;
+  top: 50%;
 }
 
 .center {
