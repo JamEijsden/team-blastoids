@@ -7,13 +7,8 @@ import {StoreService} from "../_service/store-service";
   styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent implements OnInit {
+  constructor() {
 
-  name;
-  colorProperties;
-
-  constructor(private _store: StoreService) {
-    this.name = this._store.getPlayerName();
-    this.colorProperties = this._store.getPlayerColor();
   }
 
   ngOnInit() {

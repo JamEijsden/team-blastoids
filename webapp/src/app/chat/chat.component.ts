@@ -59,8 +59,8 @@ export class ChatComponent implements OnInit, AfterViewInit {
         } else {
           this.colorProperties = player.color;
           const data = {
-            color: this.getHexColorValuue(this.colorProperties.color);
-            textColor: player.color.textColor;
+            color: this.getHexColorValuue(this.colorProperties.color),
+            textColor: player.color.textColor,
             name: this.name
           }
           this._websocket.publish('chat', 'color', data);

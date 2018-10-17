@@ -10,7 +10,6 @@ import {ChatModule} from "../chat/chat.module";
     MatSidenavModule,
     MatButtonModule,
     MatIconModule,
-    ChatModule
   ],
   exports: [MenuComponent],
   declarations: [MenuComponent]

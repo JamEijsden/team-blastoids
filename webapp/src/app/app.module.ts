@@ -8,9 +8,7 @@ import {HomeModule} from "./home/home.module";
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {StoreService} from "./_service/store-service";
 import {WebsocketService} from "./_service/websocket-service";
-import { MenuComponent } from './menu/menu.component';
-import { ChatComponent } from './chat/chat.component';
-import { MessageComponent } from './chat/message/message.component';
+import {ChatMenuModule} from "./chat-menu/chat-menu.module";
 
 @NgModule({
   declarations: [
@@ -21,7 +19,8 @@ import { MessageComponent } from './chat/message/message.component';
     BrowserAnimationsModule,
     AstroidsEvolvedModule,
     RouterModule,
-    HomeModule
+    HomeModule,
+    ChatMenuModule
   ],
   providers: [
     StoreService,
