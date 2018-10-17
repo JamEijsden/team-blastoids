@@ -10,7 +10,7 @@ export class WebsocketService {
   sub: WebSocketSubject<any>;
 
   private sockets: Map<string, any> = new Map();
-  private url = 'ws://localhost:8080/';
+  private url = '192.168.1.7:8080/';
   constructor() {}
 
   connect(route: string){

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnInit, ViewChild} from '@angular/core';
 
 @Component({
   selector: 'app-message',
@@ -12,6 +12,8 @@ export class MessageComponent implements OnInit {
   @Input() color;
   @Input() isClient = false;
   @Input() textColor;
+
+  @ViewChild('messageElem') messageElem;
 
   private viewReady = false;
   messageCss = "sender";

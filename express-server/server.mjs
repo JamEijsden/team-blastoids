@@ -19,7 +19,7 @@ app.use(function (req, res, next) {
   console.log('Headers Middleware Called');
 
   // Website you wish to allow to connect
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.setHeader('Access-Control-Allow-Origin', 'http://0.0.0.0:4200');
 
   // Request methods you wish to allow
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -52,8 +52,18 @@ const chat = io
 .on('connection', (socket) => {
 
 	socket.on('message', (msg) => {
+		console.log(msg);
 		socket.broadcast.emit('message', msg);
-	})
+	});
+
+	socket.on('color', (data) => {
+		socket.broadcast.emit('color', data);
+	});
+
+
+	socket.on('name', (data) => {
+		socket.broadcast.emit('name', data);
+	});
 
 });
 
@@ -75,7 +85,7 @@ const game = io
   });
 });
 
-server.listen(port, () => {
+server.listen(port, "192.168.1.7", () => {
 	console.log("Server running on 127.0.0.1:" + port);
 });
 

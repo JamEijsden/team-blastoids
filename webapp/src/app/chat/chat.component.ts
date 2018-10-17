@@ -1,4 +1,4 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, ElementRef, QueryList, ViewChildren, AfterViewInit, Directive} from '@angular/core';
 import {WebsocketService} from "../_service/websocket-service";
 import {StoreService} from "../_service/store-service";
 import {MessageComponent} from "./message/message.component";
@@ -8,9 +8,11 @@ import {MessageComponent} from "./message/message.component";
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit {
+export class ChatComponent implements OnInit, AfterViewInit {
   @Input() name;
   @Input("colorProperties") colorProperties;
+
+  @ViewChildren('messagesElem') messagesElem: QueryList<ElementRef>;
 
   textColor;
   connected = false;
@@ -45,7 +47,10 @@ export class ChatComponent implements OnInit {
     this._store.playerChanged
       .subscribe(player => {
         if(!!player.name){
+          player.oldName = this.name;
+          player.newName = player.name;
           this.name = player.name;
+          this._websocket.publish('chat', 'name', player)
           this.messages.forEach((message: MessageComponent) => {
             if(!!message.isClient){
               message.name = this.name;
@@ -53,6 +58,12 @@ export class ChatComponent implements OnInit {
           });
         } else {
           this.colorProperties = player.color;
+          const data = {
+            color: this.getHexColorValuue(this.colorProperties.color);
+            textColor: player.color.textColor;
+            name: this.name
+          }
+          this._websocket.publish('chat', 'color', data);
           this.messages.forEach((message: MessageComponent) => {
             if(!!message.isClient){
               message.color = this.getHexColorValuue(this.colorProperties.color);
@@ -67,6 +78,23 @@ export class ChatComponent implements OnInit {
     const chat = this._websocket.connect('chat');
     chat.on('message', (msg) => {
       this.messages.push(msg);
+    });
+
+    chat.on('color', (data) => {
+      this.messages.forEach(message => {
+        if(message.name == data.name){
+          message.color = data.color;
+          message.textColor = data.textColor;
+        }
+      });
+    });
+
+    chat.on('name', (data) => {
+      this.messages.forEach(message => {
+        if(message.name == data.oldName){
+          message.name = data.newName;
+        }
+      });
     });
   }
 
@@ -92,7 +120,14 @@ export class ChatComponent implements OnInit {
     msg.isClient = true;
     this.messages.push(msg);
     elem.value = "";
-    elem.blur();
+    //elem.blur();
   }
 
+  ngAfterViewInit() {
+    this.messagesElem.changes.subscribe((change) => {
+      if (!!change && !!change.last) {
+        change.last.nativeElement.scrollIntoView();
+      }
+    });
+  }
 }

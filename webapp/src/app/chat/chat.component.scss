@@ -7,10 +7,25 @@ mat-form-field {
 }
 
 .flex-row {
+  height: calc(100% - 66px);
   display: flex;
   flex-direction: column;
 }
 
+.overflow {
+  overflow-y: scroll;
+}
+
 .row {
   margin-bottom: 10px;
+}
+
+
+.message {
+  margin: 0 auto;
+  position: absolute;
+  width: 95%;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
