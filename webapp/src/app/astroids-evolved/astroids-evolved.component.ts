@@ -108,7 +108,7 @@ export class AstroidsEvolvedComponent implements OnInit {
 
   initPlayer(x, y){
     const player = new Player(this.playerId, this.movementVelocity, this.acceleration, true);
-    player.color = +this.playerColor.color;
+    player.color = +this.playerColor; //.color;
     const spawn = {
       x: x,
       y: y
