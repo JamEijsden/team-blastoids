@@ -6,7 +6,7 @@ import {Bullet} from './player/bullet';
 import {Bomb} from './player/bomb';
 import {StoreService} from "../_service/store-service";
 import {WebsocketService} from "../_service/websocket-service";
-
+import { timer } from 'rxjs';
 declare var PIXI;
 
 
@@ -17,10 +17,10 @@ declare var PIXI;
 })
 export class AstroidsEvolvedComponent implements OnInit {
 
-
   private STATE = this.play;
   playerId: string = '';
-  playerColor: string = '';
+  playerColor: any;
+  updatingInitated = false;
   players: Map<String, Player> = new Map();
   app: PIXI.Application;
   @ViewChild('container') container: ElementRef;
@@ -48,23 +48,57 @@ export class AstroidsEvolvedComponent implements OnInit {
   connectToServer(){
     const c = this._websocket.connect('game');
     c.on('connect', ()=>{
-        c.emit('join', {name: this.playerId, color: this.playerColor});
+        c.emit('join', {name: this.playerId, color: this.playerColor.color, textColor: this.playerColor.textColor});
     });
 
-    c.on('join_data', (players) => {
-      console.log(players);
+    c.on('join_data', (players: Map<string, any>) => {
+      players = new Map(players);
       this.initPlayers(players);
-      this.initPlayer(players[0].pos.x, players[0].pos.y);
+      this.initPlayer(players.get("HOST").pos.x, players.get("HOST").pos.y);
+      const playerObject = {
+        id: this.playerId,
+        color: this.playerColor.color,
+        textColor: this.playerColor.textColor,
+        pos: {
+          x: this.players.get(this.playerId).x,
+          y: this.players.get(this.playerId).y
+        }
+      };
+      c.emit('player_ready', playerObject);
       this.init();
+      if(!this.updatingInitated){
+        timer(0, 100)
+          .subscribe(
+            tick => {
+              c.emit('update', this.getPlayerObject(this.playerId));
+            });
+        this.updatingInitated = true;
+      }
       c.on('update', (data)=>{
-        console.log(data);
+        const players = new Map(data);
+        this.updatePlayers(players);
       });
     });
 
     c.on('join', ()=>{
 
     });
+  }
 
+  getPlayerObject(id){
+    const player = {
+      id: id,
+      color: this.playerColor.color,
+      textColor: this.playerColor.textColor,
+      pos: {
+        x: this.players.get(id).x,
+        y: this.players.get(id).y
+      }
+    };
+    return player;
+  }
+
+  initUpdateToServer(c){
   }
 
 
@@ -106,8 +140,21 @@ export class AstroidsEvolvedComponent implements OnInit {
     });
   }
 
-  initPlayer(x, y){
-    const player = new Player(this.playerId, this.movementVelocity, this.acceleration, true);
+  updatePlayers(players){
+    players.forEach(
+      player => {
+        if(!this.players.has(player.id)){
+          this.addNewPlayer(player)
+        } else {
+          if(player.id == this.playerId){return;}
+          const p = this.players.get(player.id);
+          p.updatePlayerPosition(player.pos.x, player.pos.y);
+        }
+      });
+  }
+
+  initPlayer(x, y, interactive = true){
+    const player = new Player(this.playerId, this.movementVelocity, this.acceleration, interactive);
     player.color = +this.playerColor.color;
     const spawn = {
       x: x,
@@ -119,19 +166,23 @@ export class AstroidsEvolvedComponent implements OnInit {
     this.players.set(player.id, player);
   }
 
+  addNewPlayer(p){
+    const player = new Player(p.id, this.movementVelocity, this.acceleration, false);
+    player.color = + p.color;
+    const spawn = {
+      x: p.pos.x,
+      y: p.pos.y
+    };
+    this.addToScene(player.createPlayerGraphic(spawn));
+    this.addToScene(player.bomb);
+    this.addToScene(player.nameTag);
+    this.players.set(player.id, player);
+  }
+
   initPlayers(players){
     players.forEach(
       p => {
-        const player = new Player(p.id, this.movementVelocity, this.acceleration, false);
-        player.color = + p.color;
-        const spawn = {
-          x: p.pos.x,
-          y: p.pos.y
-        };
-        this.addToScene(player.createPlayerGraphic(spawn));
-        this.addToScene(player.bomb);
-        this.addToScene(player.nameTag);
-        this.players.set(player.id, player);
+
       });
   }
 
