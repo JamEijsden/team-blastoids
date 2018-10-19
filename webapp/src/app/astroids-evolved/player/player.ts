@@ -24,6 +24,7 @@ export class Player{
   private minVelocity = 0;
   private acceleration = 0.5;
   nameTag: PIXI.Text;
+  pastPosition = {x: null, y: null, diff_x: null, diff_y: null};
 
 
   constructor(playerId: string,  movementVelocity, acceleration, interactive: boolean) {
@@ -72,6 +73,8 @@ export class Player{
     //this.graphic.scale.set(0.3);
     this.graphic.x = spawn.x;
     this.graphic.y = spawn.y;
+    this.pastPosition.x = spawn.x;
+    this.pastPosition.y = spawn.y;
     this.graphic.ax = 0;
     this.graphic.vx = 0;
     this.graphic.ay = 0;
@@ -92,6 +95,20 @@ export class Player{
       this.initKeyboardListeners();
     }
     return this.graphic;
+  }
+
+  updatePlayerPosition(x, y){
+    this.graphic.vx = (this.pastPosition.x == x) ? 0 : (x - this.pastPosition.x)/12.5;
+    this.graphic.vy = (this.pastPosition.y == y) ? 0 : (y - this.pastPosition.y)/12.5;
+    this.pastPosition.x = x;
+    this.pastPosition.y = y;
+    this.x = x;
+    this.y = y;
+    if(!this.isBombActive) {
+      this.bomb.x = x;
+      this.bomb.y = y;
+    };
+    this.updateNameTagPosition();
   }
 
   updatePLayerPositionX(){

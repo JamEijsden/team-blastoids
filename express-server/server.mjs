@@ -46,53 +46,86 @@ app.use('/ws', wsRoutes);
 
 
 const io = socketIO(server);
+
+const players = new Array();
 const host = {
-		id: 'Stiffi',
+		id: 'HOST',
 		color: '0x00F0F0',
 		pos: {
 			x: 400,
 			y: 400
 		}
 };
-const players = [host];
-
-const chat = io
-.of('/chat')
-.on('connection', (socket) => {
-
-	socket.on('message', (msg) => {
-		console.log(msg);
-		socket.broadcast.emit('message', msg);
-	});
-
-	socket.on('color', (data) => {
-		socket.broadcast.emit('color', data);
-	});
 
 
-	socket.on('name', (data) => {
-		socket.broadcast.emit('name', data);
-	});
+function init(io) {
+  players.push([host.id, host]);
 
-});
+  setInterval(()=>{io.of('game').emit('update', players)}, 300);
+  const chat = io
+  .of('/chat')
+  .on('connection', (socket) => {
 
-const game = io
-.of("/game")
-.on('connection', (socket) => {
-	//socket.emit('connect', JSON.stringify({ hello: 'world', nsp: nsp.name}));
-	socket.on('join', (player) => {
-		socket.emit('join_data', players);
-		//socket.broadcast.emit('join', player);
-	});
+  	socket.on('message', (msg) => {
+  		console.log(msg);
+  		socket.broadcast.emit('message', msg);
+  	});
 
-	socket.on('host', (player)=>{
-		host = player;
-	});
+  	socket.on('color', (data) => {
+  		socket.broadcast.emit('color', data);
+  	});
 
-  socket.on('disconnect', function () {
-    io.emit('Client disconnected');
+
+  	socket.on('name', (data) => {
+  		socket.broadcast.emit('name', data);
+  	});
+
   });
-});
+
+  const game = io
+  .of("/game")
+  .on('connection', (socket) => {
+  	//socket.emit('connect', JSON.stringify({ hello: 'world', nsp: nsp.name}));
+    socket.on('update', (player) => {
+        //socket.emit('join_data', players);
+        //socket.broadcast.emit('join', player);
+        //console.log("update", player.id);
+        players.forEach(
+          p => {
+            if(player.id == p[0]) {
+              p[1].pos = player.pos;
+              //console.log(true, p);
+              return;
+            }
+          });
+      });
+
+    socket.on('join', (player) => {
+  		socket.emit('join_data', players);
+  		//socket.broadcast.emit('join', player);
+  	});
+
+
+    socket.on('player_ready', (player) => {
+      //socket.emit('join_data', players);
+      //socket.broadcast.emit('join', player);
+      player.pos = host.pos;
+      players.push([player.id, player])
+      console.log(player, "joined the game");
+    });
+
+  	socket.on('host', (player)=>{
+  		host = player;
+  	});
+
+    socket.on('disconnect', function () {
+      io.emit('Client disconnected');
+    });
+  });
+
+}
+
+init(io);
 
 server.listen(port, "0.0.0.0", () => {
 	console.log("Server running on 127.0.0.1:" + port);
