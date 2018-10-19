@@ -2,15 +2,23 @@
   "name": "express-server",
   "version": "1.0.0",
   "description": "MongoDB RestAPI",
+  "config": {
+    "websocketPort": "8080",
+    "remote_host": "0.0.0.0",
+    "local_host": "127.0.0.1",
+    "configpath": "./shared/configs.js"
+  },
   "main": "\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --experimental-modules server.mjs"
+    "start": "nodemon --experimental-modules server.mjs host=123 websocketport=300",
+    "helper": "node -e \"require('./shared/config').dict()\""
   },
   "author": "Jimmie Van Eijsden",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
     "cors": "^2.8.4",
     "express": "^4.16.4",
     "mongoose": "^5.3.4",
