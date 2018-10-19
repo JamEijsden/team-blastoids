@@ -4,21 +4,21 @@ import http from 'http';
 import socketIO from 'socket.io';
 import cors from 'cors';
 
+
 const app = express();
 
 import userRoutes from './routes/user';
 import wsRoutes from './routes/ws/game';
+import configs from './shared/config';
 
 // const db = mongoose.connect('mongodb://127.0.0.1:27017/users');
-const port = process.env.PORT || 8080;
+const config_port = process.env.PORT || 8080;
+const config_host = configs.fields.host; //'0.0.0.0';
 
 const server = http.createServer(app);
-
 // This creates our socket using the instance of the server
 
 app.use(function (req, res, next) {
-  console.log('Headers Middleware Called');
-
   // Website you wish to allow to connect
   res.setHeader('Access-Control-Allow-Origin', 'http://0.0.0.0:4200');
 
@@ -61,13 +61,13 @@ const host = {
 function init(io) {
   players.push([host.id, host]);
 
-  setInterval(()=>{io.of('game').emit('update', players)}, 300);
+  setInterval(()=>{io.of('game').emit('update', players)}, 10);
   const chat = io
   .of('/chat')
   .on('connection', (socket) => {
 
   	socket.on('message', (msg) => {
-  		console.log(msg);
+  		// console.log(msg);
   		socket.broadcast.emit('message', msg);
   	});
 
@@ -127,8 +127,8 @@ function init(io) {
 
 init(io);
 
-server.listen(port, "0.0.0.0", () => {
-	console.log("Server running on 127.0.0.1:" + port);
+server.listen(config_port, config_host, () => {
+	console.log("Server running on "+config_host+":" + config_port);
 });
 
 // routes go here

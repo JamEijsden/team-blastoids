@@ -3,7 +3,7 @@ declare var PIXI;
 
 export class Bomb {
   static create(radius, x, y, fillColor, opacity) {
-    console.log("CREAT BOMB", radius, x, y);
+    // console.log("CREAT BOMB", radius, x, y);
     const bomb = new PIXI.Graphics();
     bomb.radius = radius;
     bomb.opacity = opacity;

@@ -105,7 +105,7 @@ export class AstroidsEvolvedComponent implements OnInit {
   ngOnInit() {
     this.initApp();
     this.app.stage.interactive = true;
-    console.log();
+    // console.log();
 
     this.connectToServer();
   }

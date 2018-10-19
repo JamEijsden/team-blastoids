@@ -4,13 +4,17 @@ import {WebSocketSubject} from "rxjs/webSocket";
 import * as io from 'socket.io-client';
 import {Observable, Subject} from "rxjs";
 
+const config_host = '127.0.0.1';
+
+const config_websocketPort = '8080';
+
 @Injectable()
 export class WebsocketService {
 
   sub: WebSocketSubject<any>;
 
   private sockets: Map<string, any> = new Map();
-  private url = '127.0.0.1:8080/';
+  private url = config_host + ':' + config_websocketPort + '/';
   constructor() {}
 
   connect(route: string){
@@ -31,7 +35,7 @@ export class WebsocketService {
 
   publish(nsp, event, msg, header?) {
     this.sockets.get(nsp).emit(event, msg);
-    console.log(nsp, event, msg);
+    // console.log(nsp, event, msg);
   }
 
 }
