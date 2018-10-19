@@ -15,9 +15,7 @@ const port = process.env.PORT || 8080;
 const server = http.createServer(app);
 
 // This creates our socket using the instance of the server
-app.use(cors);
 
-/*
 app.use(function (req, res, next) {
   console.log('Headers Middleware Called');
 
@@ -39,7 +37,7 @@ app.use(function (req, res, next) {
 
   next();
 });
-*/
+
 
 //io.origins('*:*');
 //app.use(cors());

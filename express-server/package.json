@@ -5,7 +5,7 @@
   "main": "\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "nodemon --experimental-modules server.mjs"
   },
   "author": "Jimmie Van Eijsden",
   "license": "ISC",
@@ -14,6 +14,7 @@
     "cors": "^2.8.4",
     "express": "^4.16.4",
     "mongoose": "^5.3.4",
+    "nodemon": "^1.18.4",
     "socket.io": "^2.1.1",
     "winston": "^3.1.0",
     "ws": "^6.1.0"
