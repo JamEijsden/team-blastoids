@@ -9,12 +9,15 @@ const app = express();
 import userRoutes from './routes/user';
 import wsRoutes from './routes/ws/game';
 
-const db = mongoose.connect('mongodb://127.0.0.1:27017/users');
+// const db = mongoose.connect('mongodb://127.0.0.1:27017/users');
 const port = process.env.PORT || 8080;
 
 const server = http.createServer(app);
 
 // This creates our socket using the instance of the server
+app.use(cors);
+
+/*
 app.use(function (req, res, next) {
   console.log('Headers Middleware Called');
 
@@ -36,6 +39,7 @@ app.use(function (req, res, next) {
 
   next();
 });
+*/
 
 //io.origins('*:*');
 //app.use(cors());
@@ -92,7 +96,7 @@ const game = io
   });
 });
 
-server.listen(port, "192.168.1.7", () => {
+server.listen(port, "0.0.0.0", () => {
 	console.log("Server running on 127.0.0.1:" + port);
 });
 
