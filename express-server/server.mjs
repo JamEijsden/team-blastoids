@@ -9,11 +9,11 @@ const app = express();
 
 import userRoutes from './routes/user';
 import wsRoutes from './routes/ws/game';
-import configs from './shared/config';
+import config from './shared/config';
 
 // const db = mongoose.connect('mongodb://127.0.0.1:27017/users');
 const config_port = process.env.PORT || 8080;
-const config_host = configs.fields.host; //'0.0.0.0';
+const config_host = config.fields.host; //'0.0.0.0';
 
 const server = http.createServer(app);
 // This creates our socket using the instance of the server

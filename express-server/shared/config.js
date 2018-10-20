@@ -19,15 +19,18 @@ let config = {
 };
 
 var args = process.argv.slice(2);
+
 args.forEach((val, index, arr) => {
-    console.log(val.split("="));
+    const split = val.split("=");
+    if(split.length == 2){
+        config[split[0]] = split[1];
+    }
 });
 
 
 
-
 module.exports = {
-    fields: () => {return config},
+    fields: config,
     dict: function (){
         infolog("Override these settings by using them as params when starting the server.mjs")
         highlightedlog("["+Object.keys(config).join(",")+"]");

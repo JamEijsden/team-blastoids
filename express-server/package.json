@@ -11,8 +11,9 @@
   "main": "\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C\u001b[C",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --experimental-modules server.mjs host=123 websocketport=300",
-    "helper": "node -e \"require('./shared/config').dict()\""
+    "start": "nodemon --experimental-modules server.mjs",
+    "example": "nodemon --experimental-modules server.mjs host=192.168.0.6",
+    "helper": "node -e \"require('../shared/config').dict()\""
   },
   "author": "Jimmie Van Eijsden",
   "license": "ISC",
