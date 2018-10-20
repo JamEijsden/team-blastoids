@@ -4,7 +4,6 @@ import http from 'http';
 import socketIO from 'socket.io';
 import cors from 'cors';
 
-
 const app = express();
 
 import userRoutes from './routes/user';
@@ -16,6 +15,7 @@ const config_port = process.env.PORT || 8080;
 const config_host = config.fields.host; //'0.0.0.0';
 
 const server = http.createServer(app);
+
 // This creates our socket using the instance of the server
 
 app.use(function (req, res, next) {
@@ -61,7 +61,10 @@ const host = {
 function init(io) {
   players.push([host.id, host]);
 
-  setInterval(()=>{io.of('game').emit('update', players)}, 10);
+  setInterval(()=>{io.of('game').emit('position_update', players)}, 200);
+  io.on('player_shoot', (player) => {
+    socket.broadcast.emit('player_shoot', player);
+  });
   const chat = io
   .of('/chat')
   .on('connection', (socket) => {
@@ -86,10 +89,15 @@ function init(io) {
   .of("/game")
   .on('connection', (socket) => {
   	//socket.emit('connect', JSON.stringify({ hello: 'world', nsp: nsp.name}));
-    socket.on('update', (player) => {
+    socket.on('position_update', (player) => {
         //socket.emit('join_data', players);
         //socket.broadcast.emit('join', player);
         //console.log("update", player.id);
+
+        /*socket.on('disconnect', (player)=>{
+           socket.broadcast.emit('disconnect', player);
+         });*/
+
         players.forEach(
           p => {
             if(player.id == p[0]) {
@@ -100,11 +108,18 @@ function init(io) {
           });
       });
 
+      socket.on('player_shoot', (player) => {
+        socket.broadcast.emit('player_shoot', player);
+      });
+
+      socket.on('bomb_used', (player) => {
+        socket.broadcast.emit('bomb_used', player);
+      });
+
     socket.on('join', (player) => {
   		socket.emit('join_data', players);
   		//socket.broadcast.emit('join', player);
   	});
-
 
     socket.on('player_ready', (player) => {
       //socket.emit('join_data', players);

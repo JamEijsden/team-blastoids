@@ -25,6 +25,7 @@ export class Player{
   private acceleration = 0.5;
   nameTag: PIXI.Text;
   pastPosition = {x: null, y: null, diff_x: null, diff_y: null};
+  socketConnection;
 
 
   constructor(playerId: string,  movementVelocity, acceleration, interactive: boolean) {
@@ -35,6 +36,10 @@ export class Player{
     if(this.interactive) {
       this.initKeyListeners();
     }
+  }
+
+  setConnection(c) {
+    this.socketConnection = c;
   }
 
   initKeyListeners(){
@@ -204,10 +209,16 @@ export class Player{
       if(!this.isBombAvailable || !this.isAlive) return;
       this.isBombAvailable = false;
       this.isBombActive = true;
+      this.socketConnection.emit('bomb_used', {id: this.id});
     }
     ;
     this.space.release = () => {
     };
+  }
+
+  activateBomb() {
+    this.isBombAvailable = false;
+    this.isBombActive = true;
   }
 
   // Pixi.Graphics setter and getters
@@ -259,4 +270,10 @@ export class Player{
     this.graphic.opacity = opacity;
   }
 
+  removePlayer() {
+    this.graphic.clear();
+    this.bomb.clear();
+    this.nameTag.clear();
+    console.log(this.id + " has left the game");
+  }
 }

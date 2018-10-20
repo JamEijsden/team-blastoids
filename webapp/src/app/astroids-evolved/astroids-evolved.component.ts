@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import * as PIXI from 'pixi.js/dist/pixi.js';
 import {Keyboard} from './player/keyboard';
 import {Player} from './player/player';
@@ -15,7 +15,7 @@ declare var PIXI;
   templateUrl: './astroids-evolved.component.html',
   styleUrls: ['./astroids-evolved.component.scss']
 })
-export class AstroidsEvolvedComponent implements OnInit {
+export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
 
   private STATE = this.play;
   playerId: string = '';
@@ -54,35 +54,44 @@ export class AstroidsEvolvedComponent implements OnInit {
     c.on('join_data', (players: Map<string, any>) => {
       players = new Map(players);
       this.initPlayers(players);
-      this.initPlayer(players.get("HOST").pos.x, players.get("HOST").pos.y);
-      const playerObject = {
-        id: this.playerId,
-        color: this.playerColor.color,
-        textColor: this.playerColor.textColor,
-        pos: {
-          x: this.players.get(this.playerId).x,
-          y: this.players.get(this.playerId).y
-        }
-      };
-      c.emit('player_ready', playerObject);
+      this.initPlayer(players.get("HOST").pos.x, players.get("HOST").pos.y)
+        .setConnection(c);
+      c.emit('player_ready', this.getPlayerObject(this.playerId));
       this.init();
       if(!this.updatingInitated){
         timer(0, 100)
           .subscribe(
             tick => {
-              c.emit('update', this.getPlayerObject(this.playerId));
+              c.emit('position_update', this.getPlayerObject(this.playerId));
             });
         this.updatingInitated = true;
       }
-      c.on('update', (data)=>{
+      c.on('position_update', (data)=>{
         const players = new Map(data);
         this.updatePlayers(players);
+      });
+
+      c.on('bomb_used', (player)=> {
+        this.players.get(player.id).activateBomb();
+      });
+
+      c.on('player_shoot', (player)=> {
+        this.shoot(player, {
+          x: player.pos.x,
+          y: player.pos.y
+        });
       });
     });
 
     c.on('join', ()=>{
 
     });
+
+    /*c.on('disconnect', (player)=>{
+
+      this.players.get(player.id).removePlayer();
+      this.players.delete(player.id);
+    });*/
   }
 
   getPlayerObject(id){
@@ -93,7 +102,8 @@ export class AstroidsEvolvedComponent implements OnInit {
       pos: {
         x: this.players.get(id).x,
         y: this.players.get(id).y
-      }
+      },
+      rotation: 0
     };
     return player;
   }
@@ -105,7 +115,6 @@ export class AstroidsEvolvedComponent implements OnInit {
   ngOnInit() {
     this.initApp();
     this.app.stage.interactive = true;
-    // console.log();
 
     this.connectToServer();
   }
@@ -164,6 +173,7 @@ export class AstroidsEvolvedComponent implements OnInit {
     this.addToScene(player.bomb);
     this.addToScene(player.nameTag);
     this.players.set(player.id, player);
+    return player;
   }
 
   addNewPlayer(p){
@@ -378,10 +388,14 @@ export class AstroidsEvolvedComponent implements OnInit {
 
 
   onStageClick(event){
-    if(!this.getPlayer().isAlive) return;
-    this.shoot(this.getPlayer(), {
-      x: this.getPlayer().x,
-      y: this.getPlayer().y
+    const player = this.getPlayer();
+    if(!player.isAlive) return;
+    const playerObj = this.getPlayerObject(player.id);
+    playerObj.rotation = player.rotation;
+    player.socketConnection.emit('player_shoot', playerObj);
+    this.shoot(player, {
+      x: player.x,
+      y: player.y
     });
   }
 
@@ -555,5 +569,9 @@ export class AstroidsEvolvedComponent implements OnInit {
     // We are now meeting the frame rate, so reset the last time the animation is done
     this.g_Time = timeNow;
     return true;
+  }
+
+  ngOnDestroy(): void {
+
   }
 }
