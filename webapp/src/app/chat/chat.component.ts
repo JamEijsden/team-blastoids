@@ -108,7 +108,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
   sendMessage(elem){
     const value = elem.value;
     if(!value || value == "") return;
-    console.log(this.colorProperties.textColor);
+    // console.log(this.colorProperties.textColor);
     const msg = {
       name: this.name,
       color: this.getHexColorValuue(this.colorProperties.color),

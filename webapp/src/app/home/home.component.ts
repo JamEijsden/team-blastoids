@@ -28,7 +28,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   playerTextColor;
   constructor(private _store: StoreService, private _websocket: WebsocketService) {
     this.playerName = this._store.getPlayerName();
-    console.log( this._store.getPlayerColor());
+    // console.log( this._store.getPlayerColor());
     this.playerColor = this._store.getPlayerColor().color.replace("0x", "#");
     this.playerTextColor = this._store.getPlayerColor().textColor;
   }
