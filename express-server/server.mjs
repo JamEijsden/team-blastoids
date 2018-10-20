@@ -46,18 +46,18 @@ app.use('/ws', wsRoutes);
 const io = socketIO(server);
 
 const players = new Array();
-const host = {
+let host;/* = {
 		id: 'HOST',
 		color: '0x00F0F0',
 		pos: {
 			x: 400,
 			y: 400
 		}
-};
+};*/
 
 
 function init(io) {
-  players.push([host.id, host]);
+  //players.push([host.id, host]);
 
   setInterval(()=>{io.of('game').emit('position_update', players)}, 200);
   io.on('player_shoot', (player) => {
@@ -92,7 +92,7 @@ function init(io) {
         //socket.broadcast.emit('join', player);
         //console.log("update", player.id);
 
-        /*socket.on('disconnect', (player)=>{
+        /* socket.on('disconnect', (player)=>{
            socket.broadcast.emit('disconnect', player);
          });*/
 
@@ -106,6 +106,14 @@ function init(io) {
           });
       });
 
+      socket.on('asteroid_spawn', (asteroid) => {
+        socket.broadcast.emit('asteroid_spawn', asteroid);
+      });
+
+      socket.on('player_death', (player) => {
+        socket.broadcast.emit('player_death', player);
+      });
+
       socket.on('player_shoot', (player) => {
         socket.broadcast.emit('player_shoot', player);
       });
@@ -115,16 +123,25 @@ function init(io) {
       });
 
     socket.on('join', (player) => {
-  		socket.emit('join_data', players);
+      socket.emit('join_data', players);
+      if(players.length == 0) {
+        host = player;
+      }
   		//socket.broadcast.emit('join', player);
   	});
 
     socket.on('player_ready', (player) => {
       //socket.emit('join_data', players);
       //socket.broadcast.emit('join', player);
-      player.pos = host.pos;
-      players.push([player.id, player])
-      console.log(player, "joined the game");
+      if(players.length > 0) {
+        player.pos = host.pos;
+        players.push([player.id, player])
+        console.log(player.id, " has joined the game.");
+      } else {
+        host = player;
+        console.log("Host " + player.id + " started game");
+        players.push([player.id, player]);
+      }
     });
 
   	socket.on('host', (player)=>{
