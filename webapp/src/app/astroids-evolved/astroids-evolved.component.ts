@@ -6,7 +6,8 @@ import {Bullet} from './player/bullet';
 import {Bomb} from './player/bomb';
 import {StoreService} from "../_service/store-service";
 import {WebsocketService} from "../_service/websocket-service";
-import { timer } from 'rxjs';
+import {Subject, timer} from 'rxjs';
+import {takeUntil} from "rxjs/operators";
 declare var PIXI;
 
 
@@ -18,6 +19,7 @@ declare var PIXI;
 export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
 
   private STATE = this.play;
+  private ngDestroy: Subject<boolean> = new Subject();
   playerId: string = '';
   playerColor: any;
   updatingInitated = false;
@@ -37,9 +39,8 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   private maxVelocity = 12.5;
   private minVelocity = 0;
   private acceleration = 0.5;
-  private isHost: boolean = true;
+  private isHost: boolean = false;
   private maxFramerate: number = 60;
-
   constructor(private _websocket: WebsocketService, private _store: StoreService) {
     this.playerId = _store.getPlayerName();
     this.playerColor = _store.getPlayerColor();
@@ -52,14 +53,23 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     });
 
     c.on('join_data', (players: Map<string, any>) => {
+      console.log(players.size);
       players = new Map(players);
-      this.initPlayers(players);
-      this.initPlayer(players.get("HOST").pos.x, players.get("HOST").pos.y)
-        .setConnection(c);
+      if(players.size > 0){
+        this.initPlayers(players);
+        const host = players.values().next().value;
+        this.initPlayer(host.pos.x, host.pos.y)
+          .setConnection(c);
+      } else {
+        this.isHost = true;
+        this.initPlayer(this.app.screen.width/2, this.app.screen.height/2)
+          .setConnection(c);
+      }
       c.emit('player_ready', this.getPlayerObject(this.playerId));
       this.init();
       if(!this.updatingInitated){
-        timer(0, 100)
+        timer(0, 210)
+          .pipe(takeUntil(this.ngDestroy))
           .subscribe(
             tick => {
               c.emit('position_update', this.getPlayerObject(this.playerId));
@@ -75,11 +85,27 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
         this.players.get(player.id).activateBomb();
       });
 
+      c.on('asteroid_spawn', (asteroids) => {
+        console.log(asteroids);
+        asteroids.forEach(
+          asteroid => {
+            this.app.stage.addChild(asteroid);
+            this.asteroids.push(asteroid);
+          }
+        )
+
+
+      });
+
       c.on('player_shoot', (player)=> {
         this.shoot(player, {
           x: player.pos.x,
           y: player.pos.y
         });
+      });
+
+      c.on('player_death', (player)=> {
+        this.onPlayerDeath(this.players.get(player.id));
       });
     });
 
@@ -103,6 +129,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
         x: this.players.get(id).x,
         y: this.players.get(id).y
       },
+      isAlive: true,
       rotation: 0
     };
     return player;
@@ -124,7 +151,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   }
 
   init() {
-
+    console.log(this.isHost);
     //this.initPlayer();
     this.initStageOnClickListener();
     this.initAnimations();
@@ -132,7 +159,14 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     this.app.ticker.add(delta => this.gameLoop(delta));
     this.viewLoading = false;
     if(this.isHost) {
-      //setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
+      timer(0, 160)
+
+        .pipe(takeUntil(this.ngDestroy))
+        .subscribe((tick) => {
+        this.getPlayer().socketConnection.emit('asteroid_spawn', this.newAsteroids);
+        this.newAsteroids = [];
+      });
+      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
     }
   }
 
@@ -276,11 +310,12 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
             this.asteroidsDestroyed++;
             return;
           }
-          if(player.isAlive && this.checkForCollision(player, asteroid)){
-            //this.app.stage.removeChild(this.player);
-            this.onPlayerDeath(player);
-          }
         });
+      if(this.getPlayer().isAlive && this.checkForCollision(this.getPlayer(), asteroid)){
+        //this.app.stage.removeChild(this.player);
+        this.getPlayer().socketConnection.emit('player_death', this.getPlayerObject(this.playerId));
+        this.onPlayerDeath(this.getPlayer());
+      }
     });
 
     this.players.forEach(
@@ -304,20 +339,22 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     );
   }
 
-  onPlayerDeath(player){
+  onPlayerDeath(player: Player){
     if(player.id == this.getPlayer().id) {
       this.updateHighscore();
     }
-    this.setPlayerAlive(player,false, 0.2);
+    this.setPlayerAlive(player,false);
     this.removeAllBullets(player);
     this.destroyBomb(player, true);
-    setTimeout(()=>{this.setPlayerAlive(player,true, 1)}, 3000);
+    setTimeout(()=>{
+      this.setPlayerAlive(player,true)
+    }, 3000);
   }
 
-  setPlayerAlive(player, isAlive, opacity) {
+  setPlayerAlive(player, isAlive) {
     player.isAlive = isAlive;
-    player.opacity = opacity;
-    player.bomb.opacity = opacity;
+    player.opacity = isAlive ? 1 : 0.2;
+    player.bomb.opacity = player.opacity;
     this.onlyRedrawBomb(player);
   }
 
@@ -430,6 +467,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   }
 
   private asteroids = [];
+  private newAsteroids = [];
   private asteroidSpeed = 1;
   private asteroidVariation = 5;
   createAsteroid(x, y, lineStyle=0xFF8E00){
@@ -456,8 +494,10 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
 
   spawnAsteroid(){
     const asteroid = this.createAsteroid(this.app.screen.width/2, this.app.screen.height/2);
+
     this.app.stage.addChild(asteroid);
     this.asteroids.push(asteroid);
+    this.newAsteroids.push(asteroid);
     //setTimeout(()=>this.removeObjectFromStage(asteroid, this.asteroids), 15500);
     setTimeout(()=>this.spawnAsteroid(), this.spawnTime);
   }
@@ -572,6 +612,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-
+    this.ngDestroy.next(true);
+    this.ngDestroy.complete();
   }
 }
