@@ -47,21 +47,15 @@ app.use('/ws', wsRoutes);
 
 const io = socketIO(server);
 
-const players = new Array();
-let host;/* = {
-		id: 'HOST',
-		color: '0x00F0F0',
-		pos: {
-			x: 400,
-			y: 400
-		}
-};*/
+const playersMap = new Array();
+const players = {}
+let host;
 
 
 function init(io) {
   //players.push([host.id, host]);
 
-  setInterval(()=>{io.of('game').emit('position_update', players)}, 200);
+  setInterval(()=>{io.of('game').emit('position_update', playersMap)}, 200);
   io.on('player_shoot', (player) => {
     socket.broadcast.emit('player_shoot', player);
   });
@@ -90,59 +84,54 @@ function init(io) {
   .on('connection', (socket) => {
   	//socket.emit('connect', JSON.stringify({ hello: 'world', nsp: nsp.name}));
     socket.on('position_update', (player) => {
-        //socket.emit('join_data', players);
-        //socket.broadcast.emit('join', player);
-        //console.log("update", player.id);
 
-        /* socket.on('disconnect', (player)=>{
-           socket.broadcast.emit('disconnect', player);
-         });*/
+        playersMap.forEach((p) => {
+          if(p[0] == player.id){
+            p[1].pos = player.pos;
+            return;
+          }
+        });
+        players[socket.id].pos = player.pos;
 
-        players.forEach(
-          p => {
-            if(player.id == p[0]) {
-              p[1].pos = player.pos;
-              //console.log(true, p);
-              return;
-            }
-          });
-      });
+    });
 
-      socket.on('asteroid_spawn', (asteroid) => {
-        socket.broadcast.emit('asteroid_spawn', asteroid);
-      });
+    socket.on('asteroid_spawn', (asteroid) => {
+      socket.broadcast.emit('asteroid_spawn', asteroid);
+    });
 
-      socket.on('player_death', (player) => {
-        socket.broadcast.emit('player_death', player);
-      });
+    socket.on('player_death', (player) => {
+      socket.broadcast.emit('player_death', player);
+    });
 
-      socket.on('player_shoot', (player) => {
-        socket.broadcast.emit('player_shoot', player);
-      });
+    socket.on('player_shoot', (player) => {
+      socket.broadcast.emit('player_shoot', player);
+    });
 
-      socket.on('bomb_used', (player) => {
-        socket.broadcast.emit('bomb_used', player);
-      });
+    socket.on('bomb_used', (player) => {
+      socket.broadcast.emit('bomb_used', player);
+    });
 
     socket.on('join', (player) => {
-      socket.emit('join_data', players);
-      if(players.length == 0) {
+      socket.emit('join_data', playersMap);
+      if(playersMap.length == 0) {
         host = player;
       }
-  		//socket.broadcast.emit('join', player);
-  	});
+    		//socket.broadcast.emit('join', player);
+    });
 
     socket.on('player_ready', (player) => {
       //socket.emit('join_data', players);
       //socket.broadcast.emit('join', player);
-      if(players.length > 0) {
+      if(playersMap.length > 0) {
         player.pos = host.pos;
-        players.push([player.id, player])
+        playersMap.push([player.id, player])
+        players[socket.id] = player;
         console.log(player.id, " has joined the game.");
       } else {
         host = player;
         console.log("Host " + player.id + " started game");
-        players.push([player.id, player]);
+        playersMap.push([player.id, player]);
+        players[socket.id] = player;
       }
     });
 
@@ -150,11 +139,24 @@ function init(io) {
   		host = player;
   	});
 
-    socket.on('disconnect', function () {
-      io.emit('Client disconnected');
+    socket.on('disconnect', function (event) {
+      const player = players[socket.id];
+      console.log(playersMap);
+      playersMap.splice(playersMap.indexOf([player.id, player]), 1);
+      console.log(playersMap);
+      socket.broadcast.emit('player_disconnct', {id: player.id});
+      if(host.id == player.id){
+        getConnectedSockets('/game').forEach(s => {
+          s.disconnect(true);
+        });
+      }
+      delete players[socket.id];
     });
   });
+}
 
+function getConnectedSockets(nsp = '/') {
+    return Object.values(io.of(nsp).connected);
 }
 
 init(io);

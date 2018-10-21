@@ -2,19 +2,12 @@ import {Injectable} from "@angular/core";
 import {WebSocketSubject} from "rxjs/webSocket";
 
 import * as io from 'socket.io-client';
-import {Observable, Subject} from "rxjs";
-
-const config_host = '127.0.0.1';
-
-const config_websocketPort = '8080';
-
+import {environment} from '../../environments/environment'
 @Injectable()
 export class WebsocketService {
 
-  sub: WebSocketSubject<any>;
-
   private sockets: Map<string, any> = new Map();
-  private url = config_host + ':' + config_websocketPort + '/';
+  private url = environment.wsUrl + ':' + environment.wsPort + '/';
   constructor() {}
 
   connect(route: string){

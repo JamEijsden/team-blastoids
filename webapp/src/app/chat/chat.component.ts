@@ -2,6 +2,8 @@ import {Component, OnInit, Input, ElementRef, QueryList, ViewChildren, AfterView
 import {WebsocketService} from "../_service/websocket-service";
 import {StoreService} from "../_service/store-service";
 import {MessageComponent} from "./message/message.component";
+import {ViewService} from "../_service/view-service";
+import {MessageSnackbarService} from "./message-snackbar/message-snackbar-service";
 
 @Component({
   selector: 'app-chat',
@@ -16,10 +18,11 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   textColor;
   connected = false;
-
+  socketConn;
+  viewReady = false;
   messages: Array<any> = new Array();
 
-  constructor(private _websocket: WebsocketService, private _store: StoreService) {
+  constructor(private _websocket: WebsocketService, private _store: StoreService, private _view: ViewService, private _snackbar: MessageSnackbarService) {
   }
 
   ngOnInit() {
@@ -62,7 +65,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
             color: this.getHexColorValuue(this.colorProperties.color),
             textColor: player.color.textColor,
             name: this.name
-          }
+          };
           this._websocket.publish('chat', 'color', data);
           this.messages.forEach((message: MessageComponent) => {
             if(!!message.isClient){
@@ -75,12 +78,20 @@ export class ChatComponent implements OnInit, AfterViewInit {
   }
 
   connectToServer(){
-    const chat = this._websocket.connect('chat');
-    chat.on('message', (msg) => {
+    this.socketConn = this._websocket.connect('chat');
+
+   this.socketConn.on('success', (success) => {
+     console.log("Connected to chat");
+     this.viewReady = true;
+    });
+   this.socketConn.on('message', (msg) => {
       this.messages.push(msg);
+      if(!this._view.isMenuOpen()){
+        this._snackbar.openSnackBar(msg);
+      }
     });
 
-    chat.on('color', (data) => {
+   this.socketConn.on('color', (data) => {
       this.messages.forEach(message => {
         if(message.name == data.name){
           message.color = data.color;
@@ -89,13 +100,26 @@ export class ChatComponent implements OnInit, AfterViewInit {
       });
     });
 
-    chat.on('name', (data) => {
+   this.socketConn.on('name', (data) => {
       this.messages.forEach(message => {
         if(message.name == data.oldName){
           message.name = data.newName;
         }
       });
     });
+
+    this.socketConn.on('connect_error', (error) => {
+      this.viewReady = false;
+    });
+
+    this.socketConn.on('error', (error) => {
+      this.viewReady = false;
+    });
+
+    this.socketConn.on('reconnect', (attemptNumber) => {
+      this.viewReady = true;
+    })
+    //socket.socket.reconnect();
   }
 
   getHexColorValuue(color){
@@ -125,7 +149,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     this.messagesElem.changes.subscribe((change) => {
-      if (!!change && !!change.last) {
+      if (!!change && !!change.last && this._view.isMenuOpen()) {
         change.last.nativeElement.scrollIntoView();
       }
     });

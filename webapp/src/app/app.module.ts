@@ -9,6 +9,8 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {StoreService} from "./_service/store-service";
 import {WebsocketService} from "./_service/websocket-service";
 import {ChatMenuModule} from "./chat-menu/chat-menu.module";
+import {ViewService} from "./_service/view-service";
+import { MessageSnackbarComponent } from './chat/message-snackbar/message-snackbar.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,8 @@ import {ChatMenuModule} from "./chat-menu/chat-menu.module";
   ],
   providers: [
     StoreService,
-    WebsocketService
+    WebsocketService,
+    ViewService
   ],
   bootstrap: [AppComponent]
 })

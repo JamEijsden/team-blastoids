@@ -159,14 +159,13 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     this.app.ticker.add(delta => this.gameLoop(delta));
     this.viewLoading = false;
     if(this.isHost) {
-      timer(0, 160)
-
+      /*timer(0, 300)
         .pipe(takeUntil(this.ngDestroy))
         .subscribe((tick) => {
         this.getPlayer().socketConnection.emit('asteroid_spawn', this.newAsteroids);
         this.newAsteroids = [];
       });
-      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
+      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);*/
     }
   }
 
@@ -614,5 +613,8 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.ngDestroy.next(true);
     this.ngDestroy.complete();
+    if(!!this.getPlayer() && !!this.getPlayer().socketConnection){
+      this.getPlayer().socketConnection.close();
+    }
   }
 }

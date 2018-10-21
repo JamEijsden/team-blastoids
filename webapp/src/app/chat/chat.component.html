@@ -1,10 +1,13 @@
-<div class="flex-row overflow" >
+<div *ngIf="!viewReady" class="spinner-wrapper">
+  <mat-spinner></mat-spinner>
+</div>
+<div (click)="newMessage.focus()" class="flex-row overflow" >
   <div #messagesElem  class="row" *ngFor="let message of messages" scrollTo>
     <app-message [textColor]="message.textColor" [name]="message.name" [message]="message.message" [color]="message.color" [isClient]="message.isClient" ></app-message>
   </div>
 </div>
 <div class="message">
   <mat-form-field>
-    <input #newMessage matInput (keyup.enter)="sendMessage(newMessage)" placeholder="Send a message"/>
+    <input #newMessage matInput (keyup.enter)="sendMessage(newMessage)" [disabled]="!viewReady" placeholder="Send a message"/>
   </mat-form-field>
 </div>

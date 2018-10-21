@@ -1,7 +1,7 @@
-<button mat-fab (click)="chat.toggle()" class="btn menu-btn"><mat-icon>{{chat.opened ? 'close' : 'menu'}}</mat-icon></button>
-<button mat-fab *ngIf="chat.opened" routerLink="/" class="btn home-btn"><mat-icon>home</mat-icon></button>
+<button mat-fab (click)="menu.toggle()" class="btn menu-btn"><mat-icon>{{menu.opened ? 'close' : 'menu'}}</mat-icon></button>
+<button mat-fab *ngIf="menu.opened" (click)="navigateToHome()" class="btn home-btn"><mat-icon>home</mat-icon></button>
 <mat-drawer-container [hasBackdrop]="false" class="drawer">
-  <mat-drawer #chat class="drawer-content" [autoFocus]="false" position="end" mode="over">
+  <mat-drawer #menu (openedChange)="onMenuOpenChange($event)" class="drawer-content" [autoFocus]="false" position="end" mode="over">
     <ng-content select="[menu]"></ng-content>
   </mat-drawer>
   <mat-drawer-content>

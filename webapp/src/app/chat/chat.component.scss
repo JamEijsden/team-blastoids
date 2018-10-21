@@ -1,3 +1,4 @@
+@import '../../theme';
 .flex {
   display: flex;
 }
@@ -32,4 +33,19 @@ mat-form-field {
   bottom: 0;
   left: 0;
   right: 0;
+}
+
+/deep/ snack-bar-container.custom-snackbar {
+  background: mat-color($primary);
+  max-width: 200px;
+  overflow: hidden;
+}
+
+
+div.spinner-wrapper {
+  display: flex;
+  position: absolute;
+  margin: 0 auto;
+  left: calc(50% - 50px);
+  top: calc(50% - 50px);
 }

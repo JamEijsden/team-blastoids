@@ -3,7 +3,9 @@
   <div style="">
     <span>{{name}}</span>
     <mat-card [ngStyle]="{'background': color}">
-      <span [ngStyle]="{'color': textColor}">{{message}}</span>
+      <mat-card-content [ngStyle]="{'color': textColor}">
+        {{message}}
+      </mat-card-content>
     </mat-card>
   </div>
 </div>
