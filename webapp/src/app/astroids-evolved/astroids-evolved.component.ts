@@ -8,6 +8,7 @@ import {StoreService} from "../_service/store-service";
 import {WebsocketService} from "../_service/websocket-service";
 import {Subject, timer} from 'rxjs';
 import {takeUntil} from "rxjs/operators";
+import {Router} from "@angular/router";
 declare var PIXI;
 
 
@@ -41,7 +42,8 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   private acceleration = 0.5;
   private isHost: boolean = false;
   private maxFramerate: number = 60;
-  constructor(private _websocket: WebsocketService, private _store: StoreService) {
+  constructor(private _websocket: WebsocketService, private _store: StoreService,
+              private router: Router) {
     this.playerId = _store.getPlayerName();
     this.playerColor = _store.getPlayerColor();
   }
@@ -85,15 +87,24 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
         this.players.get(player.id).activateBomb();
       });
 
-      c.on('asteroid_spawn', (asteroids) => {
-        console.log(asteroids);
+      c.on('asteroid_spawn', (data) => {
+        //console.log(asteroids);
+        const asteroids = new Map<number, any>(data);
         asteroids.forEach(
           asteroid => {
-            this.app.stage.addChild(asteroid);
-            this.asteroids.push(asteroid);
+            this.createAsteroidFromSocketData(asteroid);
           }
         )
 
+        c.on('host_disconnect', (player)=>{
+          console.log('Host ' + player.id + ' has left the game');
+          this.router.navigate([''])
+        });
+
+        c.on('player_disconnect', (player)=>{
+          console.log(player.id + ' has left the game');
+          this.remvoePlayer(player.id);
+        });
 
       });
 
@@ -118,6 +129,14 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
       this.players.get(player.id).removePlayer();
       this.players.delete(player.id);
     });*/
+  }
+
+  remvoePlayer(id){
+    const player = this.players.get(id);
+    this.players.delete(id);
+    player.removePlayer();
+    this.app.stage.removeChild(player);
+
   }
 
   getPlayerObject(id){
@@ -159,13 +178,13 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     this.app.ticker.add(delta => this.gameLoop(delta));
     this.viewLoading = false;
     if(this.isHost) {
-      /*timer(0, 300)
+      timer(0, 300)
         .pipe(takeUntil(this.ngDestroy))
         .subscribe((tick) => {
-        this.getPlayer().socketConnection.emit('asteroid_spawn', this.newAsteroids);
-        this.newAsteroids = [];
+        this.getPlayer().socketConnection.emit('asteroid_spawn', Array.from(this.newAsteroids));
+        this.newAsteroids.clear();
       });
-      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);*/
+      setTimeout(()=>{this.spawnAsteroid()}, this.baseSpawnTime);
     }
   }
 
@@ -242,7 +261,13 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   }
 
 
-  removeObjectFromStage(object, array){
+  removeObjectFromStageAndMap(object, map: Map<any, any>){
+    object.clear();
+    this.app.stage.removeChild(object);
+    map.delete(object.id);
+  }
+
+  removeObjectFromStageAndArray(object, array){
     object.clear();
     this.app.stage.removeChild(object);
     array.splice(array.indexOf(object), 1);
@@ -283,7 +308,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
       bullet.x += Math.cos(bullet.rotation)*bullet.velocity;
       bullet.y += Math.sin(bullet.rotation)*bullet.velocity;
       if(!this.isInBounds(bullet, bullet.radius)){
-        this.removeObjectFromStage(bullet, this.bullets);
+        this.removeObjectFromStageAndArray(bullet, this.bullets);
         return;
       }
     });
@@ -292,11 +317,15 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
       const newSpeed = this.difficultyModifier * (this.difficultyModifier/2);
       asteroid.x += Math.cos(asteroid.rotation)*(asteroid.velocity) + newSpeed;
       asteroid.y += Math.sin(asteroid.rotation)*(asteroid.velocity) + newSpeed;
+      if(this.newAsteroids.has(asteroid.id)) {
+        this.newAsteroids.get(asteroid.id).x = asteroid.x;
+        this.newAsteroids.get(asteroid.id).y = asteroid.y;
+      }
       this.bullets.forEach(bullet => {
         if(this.checkForCircleCollision(bullet, asteroid)){
           this.score += Math.floor(asteroid.radius/10);
-          this.removeObjectFromStage(asteroid, this.asteroids);
-          this.removeObjectFromStage(bullet, this.bullets);
+          this.removeObjectFromStageAndMap(asteroid, this.asteroids);
+          this.removeObjectFromStageAndArray(bullet, this.bullets);
           this.asteroidsDestroyed++;
           return;
         }
@@ -304,7 +333,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
       this.players.forEach(
         player => {
           if(player.isBombActive && this.checkForCircleCollision(player.bomb, asteroid)){
-            this.removeObjectFromStage(asteroid, this.asteroids);
+            this.removeObjectFromStageAndMap(asteroid, this.asteroids);
             this.score++;
             this.asteroidsDestroyed++;
             return;
@@ -334,7 +363,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     this.bullets.filter(
       bullet => bullet.playerId == player.id)
       .forEach(
-      bullet => this.removeObjectFromStage(bullet, this.bullets)
+      bullet => this.removeObjectFromStageAndArray(bullet, this.bullets)
     );
   }
 
@@ -465,13 +494,15 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     return Math.random() < 0.5 ? -1 : 1;
   }
 
-  private asteroids = [];
-  private newAsteroids = [];
+  private asteroids = new Map<number, any>();
+  private newAsteroids = new Map<number, any>();
   private asteroidSpeed = 1;
   private asteroidVariation = 5;
-  createAsteroid(x, y, lineStyle=0xFF8E00){
+  private asteroidId = 1;
+  generateAsteroid(x, y, lineStyle=0xFF8E00){
     const radius = 35 * (Math.random() + 0.3);
     const asteroid = new PIXI.Graphics();
+    asteroid.id = this.asteroidId;
     asteroid.lineStyle(2, lineStyle, 1);
     asteroid.beginFill(0xff0f22, 0);
     asteroid.drawCircle(0, 0, radius);
@@ -486,18 +517,60 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     asteroid.velocity = (Math.random() * this.asteroidVariation) + this.asteroidSpeed;
     asteroid.rotation = Math.atan2( this.getPlayer().y - asteroid.y, this.getPlayer().x - asteroid.x) + (Math.random() * (Math.PI*2)/3) - (Math.PI*2)/3;
     asteroid.count = 0;
+    this.asteroidId++;
     return asteroid;
   }
 
+  createAsteroidFromSocketData(data){
+    const radius = data.radius;
+    const lineStyle=0xFF8E00;
+    const asteroid = new PIXI.Graphics();
+    asteroid.id = data.id;
+    asteroid.lineStyle(2, lineStyle, 1);
+    asteroid.beginFill(0xff0f22, 0);
+    asteroid.drawCircle(0, 0, radius);
+    asteroid.endFill();
+    asteroid.vx = data.vx;
+    asteroid.vy = data.vy;
+    asteroid.x = data.x;//this.getAsteroidX(asteroid.vx, asteroid.vy);
+    asteroid.y = data.y;//this.getAsteroidY(asteroid.vy, asteroid.vx);
+    asteroid.radius = radius;
+    asteroid.width = radius*2;
+    asteroid.height = radius*2;
+    asteroid.velocity = data.velocity;//(Math.random() * this.asteroidVariation) + this.asteroidSpeed;
+    asteroid.rotation = data.rotation;//Math.atan2( this.getPlayer().y - asteroid.y, this.getPlayer().x - asteroid.x) + (Math.random() * (Math.PI*2)/3) - (Math.PI*2)/3;
+    asteroid.count = 0;
+    this.addAsteroid(asteroid);
+  }
+
+
+  addAsteroid(asteroid, addToNew = false ){
+    this.app.stage.addChild(asteroid);
+    this.asteroids.set(asteroid.id, asteroid);
+    if(addToNew) {
+      this.newAsteroids.set(asteroid.id, this.getAsteroidObject(asteroid));
+    }
+  }
+
+  getAsteroidObject(asteroid){
+    return {
+      id: asteroid.id,
+      radius: asteroid.radius,
+      x: asteroid.x,
+      y: asteroid.y,
+      vx: asteroid.vx,
+      vy: asteroid.vy,
+      velocity: asteroid.velocity,
+      rotation: asteroid.rotation
+    }
+  }
 
 
   spawnAsteroid(){
-    const asteroid = this.createAsteroid(this.app.screen.width/2, this.app.screen.height/2);
+    const asteroid = this.generateAsteroid(this.app.screen.width/2, this.app.screen.height/2);
 
-    this.app.stage.addChild(asteroid);
-    this.asteroids.push(asteroid);
-    this.newAsteroids.push(asteroid);
-    //setTimeout(()=>this.removeObjectFromStage(asteroid, this.asteroids), 15500);
+   this.addAsteroid(asteroid, true);
+    //setTimeout(()=>this.removeObjectFromStageAndArray(asteroid, this.asteroids), 15500);
     setTimeout(()=>this.spawnAsteroid(), this.spawnTime);
   }
 
@@ -614,7 +687,8 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
     this.ngDestroy.next(true);
     this.ngDestroy.complete();
     if(!!this.getPlayer() && !!this.getPlayer().socketConnection){
-      this.getPlayer().socketConnection.close();
+      console.log('You have been disconnnected from the game');
+      this.getPlayer().socketConnection.disconnect();
     }
   }
 }

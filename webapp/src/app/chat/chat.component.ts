@@ -80,18 +80,18 @@ export class ChatComponent implements OnInit, AfterViewInit {
   connectToServer(){
     this.socketConn = this._websocket.connect('chat');
 
-   this.socketConn.on('success', (success) => {
+    this.socketConn.on('success', (success) => {
      console.log("Connected to chat");
      this.viewReady = true;
     });
-   this.socketConn.on('message', (msg) => {
+    this.socketConn.on('message', (msg) => {
       this.messages.push(msg);
       if(!this._view.isMenuOpen()){
         this._snackbar.openSnackBar(msg);
       }
     });
 
-   this.socketConn.on('color', (data) => {
+    this.socketConn.on('color', (data) => {
       this.messages.forEach(message => {
         if(message.name == data.name){
           message.color = data.color;
@@ -100,7 +100,7 @@ export class ChatComponent implements OnInit, AfterViewInit {
       });
     });
 
-   this.socketConn.on('name', (data) => {
+    this.socketConn.on('name', (data) => {
       this.messages.forEach(message => {
         if(message.name == data.oldName){
           message.name = data.newName;

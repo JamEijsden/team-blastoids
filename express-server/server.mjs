@@ -59,10 +59,11 @@ function init(io) {
   io.on('player_shoot', (player) => {
     socket.broadcast.emit('player_shoot', player);
   });
+
   const chat = io
   .of('/chat')
   .on('connection', (socket) => {
-
+    socket.emit('success', true);
   	socket.on('message', (msg) => {
   		// console.log(msg);
   		socket.broadcast.emit('message', msg);
@@ -141,15 +142,14 @@ function init(io) {
 
     socket.on('disconnect', function (event) {
       const player = players[socket.id];
-      console.log(playersMap);
-      playersMap.splice(playersMap.indexOf([player.id, player]), 1);
-      console.log(playersMap);
-      socket.broadcast.emit('player_disconnct', {id: player.id});
       if(host.id == player.id){
-        getConnectedSockets('/game').forEach(s => {
-          s.disconnect(true);
-        });
+        console.log('Host ' + player.id + ' has left the game');
+        socket.broadcast.emit('host_disconnect', player);
+      } else {
+        console.log(player.id + ' has left the game');
+        socket.broadcast.emit('player_disconnect', player);
       }
+      playersMap.splice(playersMap.indexOf([player.id, player]), 1);
       delete players[socket.id];
     });
   });
