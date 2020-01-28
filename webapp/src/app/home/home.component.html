@@ -19,11 +19,11 @@
         </div>
         <div class="flex row">
           <mat-form-field class="center">
-            <input matInput placeholder="Name" (change)="updatePlayerName($event)" (change)="publishNameChange($event)" [(ngModel)]="playerName"/>
+            <input matInput placeholder="Name" (change)="updatePlayerName()" (change)="publishNameChange($event)" [(ngModel)]="playerName"/>
           </mat-form-field>
         </div>
         <div class="flex row" style="justify-content: center;">
-          <input #colorPicker type="color" style="display: none;" (change)="setBackgroundColorByEvent($event, colorDiv)" [(ngModel)]="playerColor"/>
+          <input #colorPicker type="color" style="display: none;" (change)="setBackgroundColorByEvent($event)" [(ngModel)]="playerColor"/>
           <div #colorDiv style="margin-top: 20px; text-align: center; height: 40px; background: #FF0000; width: 60%;" (click)="colorPicker.click()">
             <span class="" style="line-height: 40px;">Pick ship color</span>
           </div>

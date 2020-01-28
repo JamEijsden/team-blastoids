@@ -18,6 +18,6 @@ div.spinner-wrapper {
   flex-direction: column;
 }
 
-/deep/ canvas {
+::ng-deep canvas {
   display: flex;
 }

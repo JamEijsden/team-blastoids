@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {MatButtonModule, MatIconModule, MatSidenavModule} from "@angular/material";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatSidenavModule } from "@angular/material/sidenav";
 import {MenuComponent} from "./menu.component";
 import {ChatModule} from "../chat/chat.module";
 

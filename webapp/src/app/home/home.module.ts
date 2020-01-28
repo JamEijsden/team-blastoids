@@ -3,13 +3,10 @@ import { CommonModule } from '@angular/common';
 import {HomeComponent} from "./home.component";
 import {RouterModule, Routes} from "@angular/router";
 import {FormsModule} from "@angular/forms";
-import {
-  MatButtonModule,
-  MatFormFieldModule,
-  MatInputModule
-} from "@angular/material";
+import { MatButtonModule } from "@angular/material/button";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
 import {ViewTemplateModule} from "../view-template/view-template.module";
-import {WebsocketService} from "../_service/websocket-service";
 import {MenuModule} from "../menu/menu.module";
 
 

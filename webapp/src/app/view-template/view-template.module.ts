@@ -1,7 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {ViewTemplateComponent} from "./view-template.component";
-import {MatCardModule, MatProgressSpinnerModule} from "@angular/material";
+import { MatCardModule } from "@angular/material/card";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import {SpaceBackgroundModule} from "../space-background/space-background.module";
 
 @NgModule({

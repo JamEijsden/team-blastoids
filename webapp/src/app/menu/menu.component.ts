@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, OnInit, ViewChild} from '@angular/core';
 import {StoreService} from "../_service/store-service";
 import {Router} from "@angular/router";
-import {MatDrawer} from "@angular/material";
+import { MatDrawer } from "@angular/material/sidenav";
 import {ViewService} from "../_service/view-service";
 
 @Component({

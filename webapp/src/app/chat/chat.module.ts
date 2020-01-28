@@ -2,13 +2,10 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {ChatComponent} from "./chat.component";
 import {MessageModule} from "./message/message.module";
-import {
-  MatFormFieldModule,
-  MatInputModule,
-  MatProgressSpinnerModule,
-  MatSnackBar,
-  MatSnackBarModule
-} from "@angular/material";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatInputModule } from "@angular/material/input";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatSnackBar, MatSnackBarModule } from "@angular/material/snack-bar";
 import {MessageSnackbarService} from "./message-snackbar/message-snackbar-service";
 import {MessageSnackbarComponent} from "./message-snackbar/message-snackbar.component";
 import {OverlayModule} from "@angular/cdk/overlay";

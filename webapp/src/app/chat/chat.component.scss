@@ -35,7 +35,7 @@ mat-form-field {
   right: 0;
 }
 
-/deep/ snack-bar-container.custom-snackbar {
+::ng-deep snack-bar-container.custom-snackbar {
   background: mat-color($primary);
   max-width: 200px;
   overflow: hidden;

@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.viewReady = true;
     }
 
-  updatePlayerName(){
+  updatePlayerName() {
     this._store.updatePlayerName(this.playerName);
   }
 

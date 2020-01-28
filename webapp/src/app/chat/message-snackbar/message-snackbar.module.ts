@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {MessageSnackbarComponent} from "./message-snackbar.component";
-import {MatSnackBar, MatSnackBarContainer, MatSnackBarModule} from "@angular/material";
+import { MatSnackBar, MatSnackBarContainer, MatSnackBarModule } from "@angular/material/snack-bar";
 import {MessageSnackbarService} from "./message-snackbar-service";
 import {OverlayModule} from "@angular/cdk/overlay";
 
