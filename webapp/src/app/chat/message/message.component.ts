@@ -13,7 +13,7 @@ export class MessageComponent implements OnInit {
   @Input() isClient = false;
   @Input() textColor;
 
-  @ViewChild('messageElem') messageElem;
+  @ViewChild('messageElem', { static: true }) messageElem;
 
   private viewReady = false;
   messageCss = "sender";

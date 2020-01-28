@@ -10,7 +10,7 @@ import {ViewService} from "../_service/view-service";
   styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent implements OnInit {
-  @ViewChild('menu') menu: MatDrawer;
+  @ViewChild('menu', { static: true }) menu: MatDrawer;
 
   constructor(private router: Router, private _view: ViewService) {
 

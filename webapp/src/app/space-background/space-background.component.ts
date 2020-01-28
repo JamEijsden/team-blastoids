@@ -11,7 +11,7 @@ declare var PIXI;
 export class SpaceBackgroundComponent implements OnInit {
 
   app: PIXI.Application;
-  @ViewChild('container') container: ElementRef;
+  @ViewChild('container', { static: true }) container: ElementRef;
   constructor() { }
 
   ngOnInit() {

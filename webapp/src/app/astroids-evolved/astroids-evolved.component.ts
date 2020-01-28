@@ -26,7 +26,7 @@ export class AstroidsEvolvedComponent implements OnInit, OnDestroy {
   updatingInitated = false;
   players: Map<String, Player> = new Map();
   app: PIXI.Application;
-  @ViewChild('container') container: ElementRef;
+  @ViewChild('container', { static: true }) container: ElementRef;
   viewLoading = true;
   score = 0;
   highscore = 0;

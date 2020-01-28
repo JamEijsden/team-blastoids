@@ -12,7 +12,7 @@ import {Subject} from "rxjs";
 })
 export class HomeComponent implements OnInit, OnDestroy {
 
-  @ViewChild('colorDiv') colorDiv;
+  @ViewChild('colorDiv', { static: true }) colorDiv;
   @ViewChild('colorDivGText') colorDivText;
 
   viewReady = false;
