@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const https = require('https');
+const http = require('http');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const fs = require('fs');
@@ -32,7 +32,7 @@ app.get('*', (req, res) => {
 /**
  * Get port from environment and store in Express.
  */
-let defaultPort = process.argv.length < 3 ? 80 : process.argv[2];
+let defaultPort = process.argv.length < 3 ? 8000 : process.argv[2];
 
 const port = process.env.PORT ||  defaultPort;
 app.set('port', port);
