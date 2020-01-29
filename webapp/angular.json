@@ -27,7 +27,9 @@
               "src/styles.css",
               "src/theme.scss"
             ],
-            "scripts": ["node_modules/pixi.js/dist/pixi.min.js"]
+            "scripts": [
+              "node_modules/pixi.js/dist/pixi.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -132,5 +134,8 @@
       }
     }
   },
-  "defaultProject": "webapp"
+  "defaultProject": "webapp",
+  "cli": {
+    "analytics": "a7bc2af3-6559-4d29-acc3-50ffdb780e8c"
+  }
 }

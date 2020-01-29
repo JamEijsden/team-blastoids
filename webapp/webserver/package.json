@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "0.2.0",
+  "description": "Serving frontend server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node webserver.js 80"
+  },
+  "keywords": [
+    "express",
+    "nodejs",
+    "frontend"
+  ],
+  "author": "Jimmie Van  Eijsden",
+  "license": "ISC",
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.16.4"
+  }
+}
+
